@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:dio/dio.dart';
 import 'package:makan/api/dio_helper.dart';
 import 'package:makan/types/google_geocode.dart';
@@ -19,7 +21,17 @@ abstract class RestClient {
   });
 
   @GET('/place/nearbysearch/json')
-  Future<GoogleRes<List<GooglePlaces>>> nearbySearch();
+  Future<GoogleRes<List<GooglePlaces>>> nearbySearch({
+    @Query('key') required String key,
+    @Query('location') required String location,
+    @Query('radius') required int radius,
+    @Query('region') String? region = 'my',
+    @Query('keyword') String? keyword,
+    @Query('minPrice') int? minPrice = 0,
+    @Query('maxPrice') int? maxPrice = 4,
+    @Query('type') String? type = 'restaurant',
+    @Query('next_page_token') String? next_page_token,
+  });
 }
 
 RestClient client() {

@@ -6,7 +6,7 @@ import 'package:location/location.dart';
 import 'package:makan/api/rest_client.dart';
 import 'package:makan/constants/places.dart';
 import 'package:makan/env/env.dart';
-import 'package:makan/provider/location_provider.dart';
+import 'package:makan/types/nearby_places_params.dart';
 
 enum SearchRadius {
   focused,
@@ -17,11 +17,20 @@ final searchFormProvider =
     ChangeNotifierProvider((ref) => SearchFormProvider());
 
 class SearchFormProvider extends ChangeNotifier {
-  late String _locationSearchQuery = '';
-  late SearchRadius _radius = SearchRadius.expanded;
-  late (double lat, double lon) _location = (0.0, 0.0);
-  late int _minPrice = 0;
-  late int _maxPrice = 4;
+  bool _isLoading = false;
+
+  String _locationSearchQuery = '';
+  SearchRadius _radius = SearchRadius.expanded;
+  (double lat, double lon) _location = (0.0, 0.0);
+  int _minPrice = 0;
+  int _maxPrice = 4;
+  List<String> _foodTypes = [];
+
+  bool get isLoading => _isLoading;
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   String get locationSearchQuery => _locationSearchQuery;
   set locationSearchQuery(String value) {
@@ -45,7 +54,7 @@ class SearchFormProvider extends ChangeNotifier {
   // }
 
   (double lat, double lon) get location => _location;
-  bool get isLocationEmpty => _location == (0.0, 0.0);
+  bool get hasLocation => _location != (0.0, 0.0);
   set location((double lat, double lon) value) {
     _location = value;
 
@@ -66,7 +75,14 @@ class SearchFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void fetchLatLonFromGeocoder() async {
+  List<String> get foodTypes => _foodTypes;
+  set foodTypes(List<String> value) {
+    _foodTypes = value;
+
+    notifyListeners();
+  }
+
+  Future<void> fetchLatLonFromGeocoder() async {
     final res = await client()
         .getGeocode(key: Env.googleMapsApiKey, address: _locationSearchQuery);
 
@@ -88,17 +104,6 @@ class SearchFormProvider extends ChangeNotifier {
     } else {
       print('no location data');
     }
-  }
-
-  Map<String, dynamic> convertToApiParams() {
-    return {
-      'key': Env.googleMapsApiKey,
-      'location': '${_location.$1},${_location.$2}',
-      'radius': _radius == SearchRadius.focused ? 1500 : 20000,
-      'min_price': _minPrice,
-      'max_price': _maxPrice,
-      'type': 'restaurant',
-    };
   }
 
   void resetForm() {

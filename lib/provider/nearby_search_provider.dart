@@ -3,12 +3,73 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:makan/api/rest_client.dart';
+import 'package:makan/constants/places.dart';
+import 'package:makan/env/env.dart';
+import 'package:makan/provider/search_form_provider.dart';
+import 'package:makan/types/google_places.dart';
+import 'package:makan/types/nearby_places_params.dart';
 
-final nearbySearchProvider = ChangeNotifierProvider((ref) => NearbySearchProvider());
+final nearbySearchProvider =
+    ChangeNotifierProvider((ref) => NearbySearchProvider());
 
 class NearbySearchProvider extends ChangeNotifier {
-  
-  void fetchNearbySearch((double lat, double lon) location) async {
-    final res = await client().nearbySearch()
-  } 
+  bool _isLoading = false;
+
+  NearbySearchData? _nearbySearchParams;
+
+  bool get isLoading => _isLoading;
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  NearbySearchData? get nearbySearchParams => _nearbySearchParams;
+
+  set nearbySearchParams(NearbySearchData? value) {
+    _nearbySearchParams = value;
+    notifyListeners();
+  }
+
+  Future<List<GooglePlaces>> fetchNearbySearch({
+    String? keyword,
+    String? nextPageToken,
+  }) async {
+    if (_nearbySearchParams == null) {
+      return [];
+    }
+
+    final res = await client().nearbySearch(
+      key: Env.googleMapsApiKey,
+      location:
+          '${_nearbySearchParams!.location.$1},${_nearbySearchParams!.location.$2}',
+      radius:
+          _nearbySearchParams!.radius == SearchRadius.focused ? 1500 : 20000,
+      keyword: keyword,
+      minPrice: _nearbySearchParams!.minPrice,
+      maxPrice: _nearbySearchParams!.maxPrice,
+      type: 'restaurant',
+      next_page_token: nextPageToken,
+    );
+
+    if (res.status == STATUS_OK) {
+      return res.results ?? [];
+    } else {
+      print('no data');
+      return [];
+    }
+  }
+
+  void fetchAllNearbyLocations() async {
+    if (_nearbySearchParams?.foodTypes.isEmpty ?? true) {
+      final places = await fetchNearbySearch();
+      log('single: ${places.toString()}');
+      return;
+    }
+
+    for (var i = 0; i < _nearbySearchParams!.foodTypes.length; i++) {
+      final foodType = _nearbySearchParams!.foodTypes[i];
+      final places = await fetchNearbySearch(keyword: foodType);
+      log('multiple: $i - ${places.toString()}');
+    }
+  }
 }

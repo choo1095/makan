@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:makan/constants/spacing.dart';
+import 'package:makan/pages/results_page.dart';
 import 'package:makan/provider/location_provider.dart';
+import 'package:makan/provider/nearby_search_provider.dart';
 import 'package:makan/provider/search_form_provider.dart';
+import 'package:makan/types/nearby_places_params.dart';
 import 'package:makan/widgets/common_app_bar.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -20,45 +23,43 @@ final LOCATION_TYPES = [
 
 // ignore: non_constant_identifier_names
 final FOOD_TYPES = [
-  (id: 'american_restaurant', label: 'American'),
+  (id: 'american', label: 'American'),
   (id: 'bakery', label: 'Bakery'),
   (id: 'bar', label: 'Bar'),
-  (id: 'barbecue_restaurant', label: 'Barbecue Restaurant'),
-  (id: 'brazilian_restaurant', label: 'Brazilian'),
-  (id: 'breakfast_restaurant', label: 'Breakfast'),
-  (id: 'brunch_restaurant', label: 'Brunch'),
+  (id: 'barbecue', label: 'Barbecue Restaurant'),
+  (id: 'brazilian', label: 'Brazilian'),
+  (id: 'breakfast', label: 'Breakfast'),
+  (id: 'brunch', label: 'Brunch'),
   (id: 'cafe', label: 'Cafe'),
-  (id: 'chinese_restaurant', label: 'Chinese'),
-  (id: 'coffee_shop', label: 'Coffee Shop'),
-  (id: 'fast_food_restaurant', label: 'Fast Food'),
-  (id: 'french_restaurant', label: 'French'),
-  (id: 'greek_restaurant', label: 'Greek'),
-  (id: 'hamburger_restaurant', label: 'Hamburger'),
-  (id: 'ice_cream_shop', label: 'Ice Cream'),
-  (id: 'indian_restaurant', label: 'Indian'),
-  (id: 'indonesian_restaurant', label: 'Indonesian'),
-  (id: 'italian_restaurant', label: 'Italian'),
-  (id: 'japanese_restaurant', label: 'Japanese'),
-  (id: 'korean_restaurant', label: 'Korean'),
-  (id: 'lebanese_restaurant', label: 'Lebanese'),
-  (id: 'meal_delivery', label: 'Meal Delivery'),
-  (id: 'meal_takeaway', label: 'Meal Takeaway'),
-  (id: 'mediterranean_restaurant', label: 'Mediterranean'),
-  (id: 'mexican_restaurant', label: 'Mexican'),
-  (id: 'middle_eastern_restaurant', label: 'Middle Eastern'),
-  (id: 'pizza_restaurant', label: 'Pizza'),
-  (id: 'ramen_restaurant', label: 'Ramen'),
+  (id: 'chinese', label: 'Chinese'),
+  (id: 'coffee', label: 'Coffee Shop'),
+  (id: 'fast food', label: 'Fast Food'),
+  (id: 'french', label: 'French'),
+  (id: 'greek', label: 'Greek'),
+  (id: 'hamburger', label: 'Hamburger'),
+  (id: 'ice cream', label: 'Ice Cream'),
+  (id: 'indian', label: 'Indian'),
+  (id: 'indonesian', label: 'Indonesian'),
+  (id: 'italian', label: 'Italian'),
+  (id: 'japanese', label: 'Japanese'),
+  (id: 'korean', label: 'Korean'),
+  (id: 'lebanese', label: 'Lebanese'),
+  (id: 'mediterranean', label: 'Mediterranean'),
+  (id: 'mexican', label: 'Mexican'),
+  (id: 'middle eastern', label: 'Middle Eastern'),
+  (id: 'pizza', label: 'Pizza'),
+  (id: 'ramen', label: 'Ramen'),
   (id: 'restaurant', label: 'Restaurant'),
-  (id: 'sandwich_shop', label: 'Sandwich Shop'),
-  (id: 'seafood_restaurant', label: 'Seafood'),
-  (id: 'spanish_restaurant', label: 'Spanish'),
-  (id: 'steak_house', label: 'Steak House'),
-  (id: 'sushi_restaurant', label: 'Sushi'),
-  (id: 'thai_restaurant', label: 'Thai'),
-  (id: 'turkish_restaurant', label: 'Turkish'),
-  (id: 'vegan_restaurant', label: 'Vegan'),
-  (id: 'vegetarian_restaurant', label: 'Vegetarian'),
-  (id: 'vietnamese_restaurant', label: 'Vietnamese'),
+  (id: 'sandwich', label: 'Sandwich Shop'),
+  (id: 'seafood', label: 'Seafood'),
+  (id: 'spanish', label: 'Spanish'),
+  (id: 'steak', label: 'Steak House'),
+  (id: 'sushi', label: 'Sushi'),
+  (id: 'thai', label: 'Thai'),
+  (id: 'turkish', label: 'Turkish'),
+  (id: 'vegan', label: 'Vegan'),
+  (id: 'vegetarian', label: 'Vegetarian'),
+  (id: 'vietnamese', label: 'Vietnamese'),
 ];
 
 class SearchPage extends StatefulWidget {
@@ -163,45 +164,58 @@ class _SearchPageState extends State<SearchPage> {
                     .copyWith(color: Colors.black),
               ),
               const SizedBox(height: 8),
-              GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: FOOD_TYPES.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 2,
-                  crossAxisSpacing: 2,
-                  mainAxisExtent: 32,
-                ),
-                itemBuilder: (_, index) {
-                  final foodType = FOOD_TYPES[index];
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: selectedFoodTypes[index],
-                    builder: (_, value, __) {
-                      return ShadCheckbox(
-                        value: value,
-                        onChanged: (v) => selectedFoodTypes[index].value = v,
-                        label: Text(foodType.label),
-                      );
-                    },
-                  );
-                },
-              ),
+              Consumer(builder: (context, ref, _) {
+                return GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: FOOD_TYPES.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 2,
+                    crossAxisSpacing: 2,
+                    mainAxisExtent: 32,
+                  ),
+                  itemBuilder: (_, index) {
+                    final foodType = FOOD_TYPES[index];
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: selectedFoodTypes[index],
+                      builder: (_, value, __) {
+                        return ShadCheckbox(
+                          value: value,
+                          onChanged: (v) {
+                            // update checkbox value
+                            selectedFoodTypes[index].value = v;
+
+                            // update selected food types
+                            final foodTypes =
+                                ref.read(searchFormProvider).foodTypes;
+                            if (foodTypes.contains(foodType.id)) {
+                              foodTypes.remove(foodType.id);
+                            } else {
+                              foodTypes.add(foodType.id);
+                            }
+                            ref.read(searchFormProvider).foodTypes = foodTypes;
+                          },
+                          label: Text(foodType.label),
+                        );
+                      },
+                    );
+                  },
+                );
+              }),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Consumer(
         builder: (context, ref, _) {
-          final searchForm = ref.read(searchFormProvider);
-          final location = ref.read(locationProvider);
-
           return Container(
             padding: PAGE_PADDING,
             child: ShadButton(
               text: const Text('Submit'),
+              enabled: !ref.watch(searchFormProvider).isLoading,
               onPressed: () {
-                onSearchSubmit(searchForm, location);
+                onSearchSubmit(ref);
               },
             ),
           );
@@ -210,19 +224,36 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  void onSearchSubmit(
-      SearchFormProvider searchForm, LocationProvider location) async {
+  void onSearchSubmit(WidgetRef ref) async {
+    final searchForm = ref.read(searchFormProvider);
+    final location = ref.read(locationProvider);
+    final nearbySearch = ref.read(nearbySearchProvider);
+
+    searchForm.isLoading = true;
+
     // get lat/lon
     if (searchForm.locationSearchQuery.trim().isNotEmpty) {
-      searchForm.fetchLatLonFromGeocoder();
+      await searchForm.fetchLatLonFromGeocoder();
     } else {
       final deviceCoordinates = await location.getLocation();
       searchForm.setLatLonFromDevice(deviceCoordinates);
     }
 
-    // pass lat lon into nearby search
-    if (searchForm.isLocationEmpty) {
+    searchForm.isLoading = false;
+
+    // pass lat lon into nearby search, then search
+    if (searchForm.hasLocation) {
+      nearbySearch.nearbySearchParams = NearbySearchData(
+        location: searchForm.location,
+        foodTypes: searchForm.foodTypes,
+        radius: searchForm.radius,
+        minPrice: searchForm.minPrice,
+        maxPrice: searchForm.maxPrice,
+      );
+
+      if (mounted) ResultsPage.goTo(context);
+    } else {
       print('error!');
-    } else {}
+    }
   }
 }
