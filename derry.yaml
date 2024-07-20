@@ -19,6 +19,11 @@ build_runner:
   (scripts): 
     - fvm flutter packages pub run build_runner build --delete-conflicting-outputs
 
+build_runner_watch:
+  (description): script to watch and generate .g.dart or .freezed.dart files
+  (scripts): 
+    - fvm flutter packages pub run build_runner watch
+
 clean_build_runner:
   (description): same as [build_runner] script but cleans the cache before running the build_runner command
   (scripts):

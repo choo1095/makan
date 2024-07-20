@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:makan/constants/spacing.dart';
+import 'package:makan/provider/location_provider.dart';
+import 'package:makan/provider/search_form_provider.dart';
 import 'package:makan/widgets/common_app_bar.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -94,11 +97,18 @@ class _SearchPageState extends State<SearchPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              ShadInputFormField(
-                id: 'location',
-                label: const Text('Location'),
-                placeholder: const Text('e.g. Uptown'),
-              ),
+              Consumer(builder: (context, ref, _) {
+                return ShadInputFormField(
+                  id: 'location',
+                  label: const Text('Location'),
+                  placeholder: const Text('e.g. Uptown, Petaling Jaya'),
+                  description: const Text(
+                    'Your current device location will be used if this is left blank.',
+                  ),
+                  onChanged: (v) =>
+                      ref.watch(searchFormProvider).locationSearchQuery = v,
+                );
+              }),
               const SizedBox(height: 32),
               Row(
                 children: [
@@ -181,19 +191,38 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: PAGE_PADDING,
-        child: ShadButton(
-          text: const Text('Submit'),
-          onPressed: () {
-            if (formKey.currentState!.saveAndValidate()) {
-              print('validation succeeded with ${formKey.currentState!.value}');
-            } else {
-              print('validation failed');
-            }
-          },
-        ),
+      bottomNavigationBar: Consumer(
+        builder: (context, ref, _) {
+          final searchForm = ref.read(searchFormProvider);
+          final location = ref.read(locationProvider);
+
+          return Container(
+            padding: PAGE_PADDING,
+            child: ShadButton(
+              text: const Text('Submit'),
+              onPressed: () {
+                onSearchSubmit(searchForm, location);
+              },
+            ),
+          );
+        },
       ),
     );
+  }
+
+  void onSearchSubmit(
+      SearchFormProvider searchForm, LocationProvider location) async {
+    // get lat/lon
+    if (searchForm.locationSearchQuery.trim().isNotEmpty) {
+      searchForm.fetchLatLonFromGeocoder();
+    } else {
+      final deviceCoordinates = await location.getLocation();
+      searchForm.setLatLonFromDevice(deviceCoordinates);
+    }
+
+    // pass lat lon into nearby search
+    if (searchForm.isLocationEmpty) {
+      print('error!');
+    } else {}
   }
 }
