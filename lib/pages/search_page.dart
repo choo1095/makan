@@ -89,121 +89,133 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CommonAppBar(),
-      body: SingleChildScrollView(
-        padding: PAGE_PADDING,
-        child: ShadForm(
-          key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Consumer(builder: (context, ref, _) {
-                return ShadInputFormField(
-                  id: 'location',
-                  label: const Text('Location'),
-                  placeholder: const Text('e.g. Uptown, Petaling Jaya'),
-                  description: const Text(
-                    'Your current device location will be used if this is left blank.',
-                  ),
-                  onChanged: (v) =>
-                      ref.watch(searchFormProvider).locationSearchQuery = v,
-                );
-              }),
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  ShadSelectFormField<String>(
-                    id: 'min_price',
-                    initialValue: '0',
-                    label: const Text('Min. Price Range'),
-                    options: PRICE_RANGE
-                        .map(
-                          (value) => ShadOption(
-                            value: value,
-                            child: Text(value),
-                          ),
-                        )
-                        .toList(),
-                    selectedOptionBuilder: (context, value) =>
-                        value == 'none' ? const Text('0') : Text(value),
-                    placeholder: const Text('0'),
-                  ),
-                  ShadSelectFormField<String>(
-                    id: 'max_price',
-                    initialValue: '4',
-                    label: const Text('Max. Price Range'),
-                    options: PRICE_RANGE
-                        .map(
-                          (value) => ShadOption(
-                            value: value,
-                            child: Text(value),
-                          ),
-                        )
-                        .toList(),
-                    selectedOptionBuilder: (context, value) =>
-                        value == 'none' ? const Text('4') : Text(value),
-                    placeholder: const Text('4'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              // ShadRadioGroupFormField<String>(
-              //   label: const Text('Location Type'),
-              //   initialValue: LOCATION_TYPES.first.id,
-              //   items: LOCATION_TYPES.map(
-              //     (e) => ShadRadio(
-              //       value: e.id,
-              //       label: Text(e.label),
-              //     ),
-              //   ),
-              // ),
-              Text(
-                'Filter by categories (select up to 5)',
-                style: ShadTextDefaultTheme.small(family: kDefaultFontFamily)
-                    .copyWith(color: Colors.black),
-              ),
-              const SizedBox(height: 8),
-              Consumer(builder: (context, ref, _) {
-                return GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: FOOD_TYPES.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 2,
-                    crossAxisSpacing: 2,
-                    mainAxisExtent: 32,
-                  ),
-                  itemBuilder: (_, index) {
-                    final foodType = FOOD_TYPES[index];
-                    return ValueListenableBuilder<bool>(
-                      valueListenable: selectedFoodTypes[index],
-                      builder: (_, value, __) {
-                        return ShadCheckbox(
-                          value: value,
-                          onChanged: (v) {
-                            // update checkbox value
-                            selectedFoodTypes[index].value = v;
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: PAGE_PADDING,
+          child: ShadForm(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Consumer(builder: (context, ref, _) {
+                  return ShadInputFormField(
+                    id: 'location',
+                    label: const Text('Location'),
+                    placeholder: const Text('e.g. Uptown, Petaling Jaya'),
+                    description: const Text(
+                      'Your current device location will be used if this is left blank.',
+                    ),
+                    onChanged: (v) =>
+                        ref.watch(searchFormProvider).locationSearchQuery = v,
+                  );
+                }),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    ShadSelectFormField<String>(
+                      id: 'min_price',
+                      initialValue: '0',
+                      label: const Text('Min. Price Range'),
+                      options: PRICE_RANGE
+                          .map(
+                            (value) => ShadOption(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
+                      selectedOptionBuilder: (context, value) =>
+                          value == 'none' ? const Text('0') : Text(value),
+                      placeholder: const Text('0'),
+                    ),
+                    ShadSelectFormField<String>(
+                      id: 'max_price',
+                      initialValue: '4',
+                      label: const Text('Max. Price Range'),
+                      options: PRICE_RANGE
+                          .map(
+                            (value) => ShadOption(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
+                      selectedOptionBuilder: (context, value) =>
+                          value == 'none' ? const Text('4') : Text(value),
+                      placeholder: const Text('4'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                // ShadRadioGroupFormField<String>(
+                //   label: const Text('Location Type'),
+                //   initialValue: LOCATION_TYPES.first.id,
+                //   items: LOCATION_TYPES.map(
+                //     (e) => ShadRadio(
+                //       value: e.id,
+                //       label: Text(e.label),
+                //     ),
+                //   ),
+                // ),
+                Text(
+                  'Filter by categories (select up to 5)',
+                  style: ShadTextDefaultTheme.small(family: kDefaultFontFamily)
+                      .copyWith(color: Colors.black),
+                ),
+                const SizedBox(height: 8),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final searchForm = ref.read(searchFormProvider);
 
-                            // update selected food types
-                            final foodTypes =
-                                ref.read(searchFormProvider).foodTypes;
-                            if (foodTypes.contains(foodType.id)) {
-                              foodTypes.remove(foodType.id);
-                            } else {
-                              foodTypes.add(foodType.id);
-                            }
-                            ref.read(searchFormProvider).foodTypes = foodTypes;
+                    return GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: FOOD_TYPES.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 2,
+                        crossAxisSpacing: 2,
+                        mainAxisExtent: 32,
+                      ),
+                      itemBuilder: (_, index) {
+                        final foodType = FOOD_TYPES[index];
+                        return ValueListenableBuilder<bool>(
+                          valueListenable: selectedFoodTypes[index],
+                          builder: (_, value, __) {
+                            return ShadCheckbox(
+                              value: value,
+                              onChanged: (v) {
+                                // if maximum food types selected, do nothing
+                                if (v == true) {
+                                  if (searchForm.maxFoodTypesSelected) {
+                                    return;
+                                  }
+                                }
+
+                                // update checkbox value
+                                selectedFoodTypes[index].value = v;
+
+                                // update selected food types
+                                final foodTypes = searchForm.foodTypes;
+                                if (foodTypes.contains(foodType.id)) {
+                                  foodTypes.remove(foodType.id);
+                                } else {
+                                  foodTypes.add(foodType.id);
+                                }
+                                searchForm.foodTypes = foodTypes;
+                              },
+                              label: Text(foodType.label),
+                            );
                           },
-                          label: Text(foodType.label),
                         );
                       },
                     );
                   },
-                );
-              }),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

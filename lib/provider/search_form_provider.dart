@@ -76,6 +76,7 @@ class SearchFormProvider extends ChangeNotifier {
   }
 
   List<String> get foodTypes => _foodTypes;
+  bool get maxFoodTypesSelected => _foodTypes.length >= 5;
   set foodTypes(List<String> value) {
     _foodTypes = value;
 

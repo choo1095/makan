@@ -17,6 +17,8 @@ class NearbySearchProvider extends ChangeNotifier {
 
   NearbySearchData? _nearbySearchParams;
 
+  List<List<GooglePlaces>> _nearbySearchResults = [];
+
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
     _isLoading = value;
@@ -24,6 +26,14 @@ class NearbySearchProvider extends ChangeNotifier {
   }
 
   NearbySearchData? get nearbySearchParams => _nearbySearchParams;
+
+  List<List<GooglePlaces>> get nearbySearchResults => _nearbySearchResults;
+  bool get hasMultipleLists => _nearbySearchResults.length > 1;
+  set nearbySearchResults(List<List<GooglePlaces>> value) {
+    _nearbySearchResults = value;
+
+    notifyListeners();
+  }
 
   set nearbySearchParams(NearbySearchData? value) {
     _nearbySearchParams = value;
@@ -59,17 +69,26 @@ class NearbySearchProvider extends ChangeNotifier {
     }
   }
 
-  void fetchAllNearbyLocations() async {
+  Future<void> fetchAllNearbyLocations() async {
+    final List<List<GooglePlaces>> results = [];
+
+    // if no food types selected,
+    // call nearby serach api once only and add that to the list of results
     if (_nearbySearchParams?.foodTypes.isEmpty ?? true) {
       final places = await fetchNearbySearch();
-      log('single: ${places.toString()}');
-      return;
+      results.add(places);
+    }
+    // if food types selected,
+    // call nearby search api as many times as the nunber of food types selected
+    else {
+      for (var i = 0; i < _nearbySearchParams!.foodTypes.length; i++) {
+        final foodType = _nearbySearchParams!.foodTypes[i];
+        final places = await fetchNearbySearch(keyword: foodType);
+
+        results.add(places);
+      }
     }
 
-    for (var i = 0; i < _nearbySearchParams!.foodTypes.length; i++) {
-      final foodType = _nearbySearchParams!.foodTypes[i];
-      final places = await fetchNearbySearch(keyword: foodType);
-      log('multiple: $i - ${places.toString()}');
-    }
+    _nearbySearchResults = results;
   }
 }
