@@ -1,0 +1,90 @@
+#============================================================
+# ** Dev scripts **
+#============================================================
+
+get:
+  (description): script to clean build folder and reinstall package dependencies
+  (scripts):
+    - fvm flutter clean
+    - fvm flutter pub get
+    - cd ios && pod install
+
+locale:
+  (description): script to generate locale_key.g.dart file for easy_localization to work
+  (scripts):
+    - fvm flutter pub run easy_localization:generate -S assets/lang -f keys -o locale_keys.g.dart
+
+build_runner:
+  (description): script to generate .g.dart or .freezed.dart files
+  (scripts): 
+    - fvm flutter packages pub run build_runner build --delete-conflicting-outputs
+
+clean_build_runner:
+  (description): same as [build_runner] script but cleans the cache before running the build_runner command
+  (scripts):
+    - fvm flutter pub run build_runner clean
+    - fvm flutter packages pub run build_runner build --delete-conflicting-outputs
+
+#============================================================
+# ** Flavorizr scripts **
+#============================================================
+
+flavorize_bundles:
+  (description): script to regenerate android / iOS config files after updating application ID / bundle ID
+  (scripts):
+    - fvm flutter pub run flutter_flavorizr -p ios:xcconfig,ios:buildTargets,ios:schema,ios:plist,android:buildGradle
+
+flavorize_icons:
+  (description): script to regenerate app icons 
+  (scripts):
+    - fvm flutter pub run flutter_flavorizr -p ios:icons,android:icons
+
+#============================================================
+# ** Build scripts **
+#============================================================
+
+build_apk: 
+  (description): script to build apk files for both production and development
+  (scripts):
+    - fvm flutter build apk --flavor development -t lib/main_development.dart —release
+    - fvm flutter build apk --flavor production -t lib/main_production.dart —release
+
+build_aab:
+  (description): script to build aab files for both production and development
+  (scripts): 
+    - fvm flutter build appbundle --release --flavor development -t lib/main_development.dart
+    - fvm flutter build appbundle --release --flavor production -t lib/main_production.dart
+
+build_ios_dev:
+  (description): script to build ios app in development
+  (scripts): 
+    - fvm flutter build ios --flavor development -t lib/main_development.dart
+
+build_ios_prod:
+  (description): script to build ios app in production
+  (scripts): 
+    - fvm flutter build ios --flavor production -t lib/main_production.dart
+
+#============================================================
+# ** Fastlane scripts **
+#============================================================
+
+fastlane_ios_dev:
+  (description): script to ship ios development app via fastlane locally
+  (scripts):
+    - cd ios && bundle exec fastlane create_testflight_build --env development
+
+fastlane_ios_prod:
+  (description): script to ship ios production app via fastlane locally
+  (scripts):
+    - cd ios && bundle exec fastlane create_testflight_build --env production
+
+fastlane_android_dev:
+  (description): script to ship android development app via fastlane locally
+  (scripts):
+    - bundle exec fastlane create_playstore_build is_draft_app:true --env development
+
+fastlane_android_prod:
+  (description): script to ship android production app via fastlane locally
+  (scripts):
+    - bundle exec fastlane create_playstore_build is_draft_app:true --env production
