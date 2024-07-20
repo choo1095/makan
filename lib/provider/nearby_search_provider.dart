@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,5 +91,33 @@ class NearbySearchProvider extends ChangeNotifier {
     }
 
     _nearbySearchResults = results;
+  }
+
+  GooglePlaces? getOneRandomPlace() {
+    if (_nearbySearchResults.isEmpty) {
+      return null;
+    }
+
+    // if only one category is displayed
+    if (_nearbySearchResults.length == 1) {
+      if (_nearbySearchResults[0].isEmpty) {
+        return null;
+      }
+
+      final randomIndex = Random().nextInt(_nearbySearchResults[0].length);
+      return _nearbySearchResults[0][randomIndex];
+    }
+
+    // if more than one category is displayed
+    else {
+      final randomCategoryIndex = Random().nextInt(_nearbySearchResults.length);
+      if (_nearbySearchResults[randomCategoryIndex].isEmpty) {
+        return null;
+      }
+
+      final randomItemIndex =
+          Random().nextInt(_nearbySearchResults[randomCategoryIndex].length);
+      return _nearbySearchResults[randomCategoryIndex][randomItemIndex];
+    }
   }
 }

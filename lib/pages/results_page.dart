@@ -4,6 +4,7 @@ import 'package:makan/constants/spacing.dart';
 import 'package:makan/provider/nearby_search_provider.dart';
 import 'package:makan/types/google_places.dart';
 import 'package:makan/widgets/common_app_bar.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ResultsPage extends ConsumerStatefulWidget {
   static Future<void> goTo(BuildContext context) async {
@@ -48,16 +49,9 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     return DefaultTabController(
       length: nearbySearch.nearbySearchResults.length,
       child: Scaffold(
-        appBar: CommonAppBar(
-          bottom: TabBar(
-            tabs: [
-              for (var item in nearbySearch.nearbySearchParams?.foodTypes ?? [])
-                Tab(
-                  text: item,
-                ),
-            ],
-          ),
-          title: 'Search Results',
+        appBar: appBar(
+          nearbySearch,
+          showTabBar: true,
         ),
         body: TabBarView(
           children: [
@@ -70,10 +64,37 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     );
   }
 
+  PreferredSizeWidget appBar(
+    NearbySearchProvider nearbySearch, {
+    required bool showTabBar,
+  }) {
+    return CommonAppBar(
+      title: 'Search Results',
+      actions: [
+        ShadButton.ghost(
+          text: const Text('Pick one!'),
+          onPressed: () => showOneRandomPlaceDialog(context, nearbySearch),
+        ),
+      ],
+      bottom: showTabBar
+          ? TabBar(
+              tabs: [
+                for (var item
+                    in nearbySearch.nearbySearchParams?.foodTypes ?? [])
+                  Tab(
+                    text: item,
+                  ),
+              ],
+            )
+          : null,
+    );
+  }
+
   Widget singleCategoryView(NearbySearchProvider nearbySearch) {
     return Scaffold(
-        appBar: const CommonAppBar(
-          title: 'Search Results',
+        appBar: appBar(
+          nearbySearch,
+          showTabBar: false,
         ),
         body: nearbySearch.nearbySearchResults.isNotEmpty
             ? resultsListView(nearbySearch.nearbySearchResults.first)
@@ -86,19 +107,38 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
             itemCount: results.length,
             itemBuilder: (context, index) {
               final place = results[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 2,
                   horizontal: PAGE_HORIZONTAL,
-                  vertical: 12,
                 ),
-                child: ListTile(
-                  title: Text(place.name ?? ''),
-                  subtitle: Text(place.vicinity ?? ''),
-                ),
+                title: Text(place.name ?? ''),
+                subtitle: Text(place.vicinity ?? ''),
               );
             },
           )
         : const Center(child: Text('No results found'));
+  }
+
+  void showOneRandomPlaceDialog(
+    BuildContext context,
+    NearbySearchProvider nearbySearch,
+  ) {
+    final randomizedPlace = nearbySearch.getOneRandomPlace();
+
+    showShadDialog(
+      context: context,
+      builder: (context) => ShadDialog(
+        title: const Text('Here is what you picked:'),
+        description: Text(randomizedPlace?.name ?? 'Nothing. Try again!'),
+        actions: [
+          ShadButton(
+            text: const Text('Ok...'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
   }
 
   void fetchData() async {

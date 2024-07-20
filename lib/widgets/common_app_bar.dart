@@ -6,14 +6,16 @@ const double _kTabHeight = 46.0;
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final PreferredSizeWidget? bottom;
+  final List<Widget>? actions;
 
-  const CommonAppBar({this.title, this.bottom, super.key});
+  const CommonAppBar({this.title, this.bottom, this.actions, super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(title ?? ''),
       automaticallyImplyLeading: true,
+      actions: actions,
       bottom: bottom,
     );
   }
