@@ -9,6 +9,7 @@ import 'package:makan/env/env.dart';
 import 'package:makan/provider/search_form_provider.dart';
 import 'package:makan/types/google_places.dart';
 import 'package:makan/types/nearby_places_params.dart';
+import 'package:makan/types/result.dart';
 
 final nearbySearchProvider =
     ChangeNotifierProvider((ref) => NearbySearchProvider());
@@ -19,6 +20,7 @@ class NearbySearchProvider extends ChangeNotifier {
   NearbySearchData? _nearbySearchParams;
 
   List<List<GooglePlaces>> _nearbySearchResults = [];
+  String? _error;
 
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
@@ -27,6 +29,10 @@ class NearbySearchProvider extends ChangeNotifier {
   }
 
   NearbySearchData? get nearbySearchParams => _nearbySearchParams;
+  set nearbySearchParams(NearbySearchData? value) {
+    _nearbySearchParams = value;
+    notifyListeners();
+  }
 
   List<List<GooglePlaces>> get nearbySearchResults => _nearbySearchResults;
   bool get hasMultipleLists => _nearbySearchResults.length > 1;
@@ -36,61 +42,83 @@ class NearbySearchProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  set nearbySearchParams(NearbySearchData? value) {
-    _nearbySearchParams = value;
+  String? get error => _error;
+  set error(String? value) {
+    _error = value;
+
     notifyListeners();
   }
 
-  Future<List<GooglePlaces>> fetchNearbySearch({
+  Future<Result<List<GooglePlaces>, String>> fetchNearbySearch({
     String? keyword,
     String? nextPageToken,
   }) async {
     if (_nearbySearchParams == null) {
-      return [];
+      return const Failure('No nearby search params found.');
     }
 
-    final res = await client().nearbySearch(
-      key: Env.googleMapsApiKey,
-      location:
-          '${_nearbySearchParams!.location.$1},${_nearbySearchParams!.location.$2}',
-      radius:
-          _nearbySearchParams!.radius == SearchRadius.focused ? 1500 : 20000,
-      keyword: keyword,
-      minPrice: _nearbySearchParams!.minPrice,
-      maxPrice: _nearbySearchParams!.maxPrice,
-      type: 'restaurant',
-      next_page_token: nextPageToken,
-    );
+    try {
+      final res = await client().nearbySearch(
+        key: Env.googleMapsApiKey,
+        location:
+            '${_nearbySearchParams!.location.$1},${_nearbySearchParams!.location.$2}',
+        radius:
+            _nearbySearchParams!.radius == SearchRadius.focused ? 1500 : 20000,
+        keyword: keyword,
+        minPrice: _nearbySearchParams!.minPrice,
+        maxPrice: _nearbySearchParams!.maxPrice,
+        type: 'restaurant',
+        next_page_token: nextPageToken,
+      );
 
-    if (res.status == STATUS_OK) {
-      return res.results ?? [];
-    } else {
-      print('no data');
-      return [];
+      if (res.status == STATUS_OK) {
+        return Success(res.results ?? []);
+      }
+
+      return Failure(res.error_message ?? 'Something went wrong.');
+    } catch (error) {
+      return Failure(error.toString());
     }
   }
 
   Future<void> fetchAllNearbyLocations() async {
     final List<List<GooglePlaces>> results = [];
 
-    // if no food types selected,
-    // call nearby serach api once only and add that to the list of results
-    if (_nearbySearchParams?.foodTypes.isEmpty ?? true) {
-      final places = await fetchNearbySearch();
-      results.add(places);
-    }
-    // if food types selected,
-    // call nearby search api as many times as the nunber of food types selected
-    else {
-      for (var i = 0; i < _nearbySearchParams!.foodTypes.length; i++) {
-        final foodType = _nearbySearchParams!.foodTypes[i];
-        final places = await fetchNearbySearch(keyword: foodType);
+    try {
+      // if no food types selected,
+      // call nearby serach api once only and add that to the list of results
+      if (_nearbySearchParams?.foodTypes.isEmpty ?? true) {
+        final res = await fetchNearbySearch();
 
-        results.add(places);
+        switch (res) {
+          case Success(value: final placeList):
+            results.add(placeList);
+            break;
+          case Failure(errorMessage: final exception):
+            throw Exception(exception);
+        }
       }
-    }
+      // if food types selected,
+      // call nearby search api as many times as the nunber of food types selected
+      else {
+        for (var i = 0; i < _nearbySearchParams!.foodTypes.length; i++) {
+          final foodType = _nearbySearchParams!.foodTypes[i];
+          final res = await fetchNearbySearch(keyword: foodType);
 
-    _nearbySearchResults = results;
+          switch (res) {
+            case Success(value: final placeList):
+              results.add(placeList);
+              break;
+            case Failure(errorMessage: final exception):
+              throw Exception(exception);
+          }
+        }
+      }
+
+      _nearbySearchResults = results;
+    } catch (error) {
+      _error = error.toString();
+    }
   }
 
   GooglePlaces? getOneRandomPlace() {

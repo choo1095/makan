@@ -6,8 +6,10 @@ part 'google_res.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class GoogleRes<T> {
-  const GoogleRes({this.next_page_token, this.results, this.status});
+  const GoogleRes(
+      {this.error_message, this.next_page_token, this.results, this.status});
 
+  final String? error_message;
   final String? next_page_token;
   final T? results;
   final String? status;

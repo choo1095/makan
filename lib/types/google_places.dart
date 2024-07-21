@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'google_places.g.dart';
@@ -6,27 +8,27 @@ part 'google_places.g.dart';
 class GooglePlaces {
   Geometry? geometry;
   String? name;
-  OpeningHours? openingHours;
+  OpeningHours? opening_hours;
   List<Photo>? photos;
-  String? placeId;
-  int? priceLevel;
+  String? place_id;
+  int? price_level;
   double? rating;
   String? reference;
   List<String>? types;
-  int? userRatingsTotal;
+  int? user_ratings_total;
   String? vicinity;
 
   GooglePlaces({
     this.geometry,
     this.name,
-    this.openingHours,
+    this.opening_hours,
     this.photos,
-    this.placeId,
-    this.priceLevel,
+    this.place_id,
+    this.price_level,
     this.rating,
     this.reference,
     this.types,
-    this.userRatingsTotal,
+    this.user_ratings_total,
     this.vicinity,
   });
 
@@ -68,10 +70,10 @@ class Location {
 
 @JsonSerializable()
 class OpeningHours {
-  bool? openNow;
+  bool? open_now;
 
   OpeningHours({
-    this.openNow,
+    this.open_now,
   });
 
   factory OpeningHours.fromJson(Map<String, dynamic> json) =>
@@ -83,14 +85,14 @@ class OpeningHours {
 @JsonSerializable()
 class Photo {
   int? height;
-  List<String>? htmlAttributions;
-  String? photoReference;
+  List<String>? html_attributions;
+  String? photo_reference;
   int? width;
 
   Photo({
     this.height,
-    this.htmlAttributions,
-    this.photoReference,
+    this.html_attributions,
+    this.photo_reference,
     this.width,
   });
 
