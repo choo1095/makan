@@ -4,8 +4,8 @@ import 'package:makan/constants/spacing.dart';
 import 'package:makan/provider/nearby_search_provider.dart';
 import 'package:makan/types/google_places.dart';
 import 'package:makan/widgets/common_app_bar.dart';
-import 'package:makan/widgets/place_randomize_one_dialog.dart';
-import 'package:makan/widgets/search_result_tile.dart';
+import 'package:makan/widgets/place_dialog.dart';
+import 'package:makan/widgets/place_tile.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ResultsPage extends ConsumerStatefulWidget {
@@ -138,7 +138,16 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
             itemCount: results.length,
             itemBuilder: (context, index) {
               final place = results[index];
-              return SearchResultTile(place: place);
+              return PlaceTile(
+                place: place,
+                horizontalPadding: PAGE_HORIZONTAL,
+                showOpeningHours: false,
+                onTap: () => showPlaceDialog(
+                  context,
+                  nearbySearch,
+                  place: place,
+                ),
+              );
             },
           )
         : Padding(
@@ -155,14 +164,34 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     NearbySearchProvider nearbySearch,
   ) async {
     final randomizedPlace = nearbySearch.getOneRandomPlace();
-    final image = nearbySearch
-        .getPlaceImage(randomizedPlace?.photos?.firstOrNull?.photo_reference);
 
     if (context.mounted) {
-      PlaceRandomizeOneDialog.show(
+      PlaceDialog.show(
         context,
+        dialogTitle: 'Here is what you picked:',
         place: randomizedPlace,
-        image: image,
+        image: randomizedPlace?.placeImage,
+        mapsUrl: randomizedPlace?.mapsUrl,
+        onReroll: () async {
+          await Future.delayed(const Duration(milliseconds: 500));
+
+          if (context.mounted) showOneRandomPlaceDialog(context, nearbySearch);
+        },
+      );
+    }
+  }
+
+  void showPlaceDialog(
+    BuildContext context,
+    NearbySearchProvider nearbySearch, {
+    required GooglePlaces place,
+  }) {
+    if (context.mounted) {
+      PlaceDialog.show(
+        context,
+        place: place,
+        image: place.placeImage,
+        mapsUrl: place.mapsUrl,
       );
     }
   }
@@ -171,10 +200,10 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     final nearbySearch = ref.read(nearbySearchProvider);
 
     // get all google nearby places from api
-    nearbySearch.isLoading = true;
+    if (mounted) nearbySearch.isLoading = true;
 
     await nearbySearch.fetchAllNearbyLocations();
 
-    nearbySearch.isLoading = false;
+    if (mounted) nearbySearch.isLoading = false;
   }
 }

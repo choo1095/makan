@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:makan/env/env.dart';
 
 part 'google_places.g.dart';
 
@@ -36,6 +37,23 @@ class GooglePlaces {
       _$GooglePlacesFromJson(json);
 
   Map<String, dynamic> toJson() => _$GooglePlacesToJson(this);
+
+  String? get placeImage {
+    final photoReference = photos?.firstOrNull?.photo_reference;
+    if (photoReference == null) {
+      return '';
+    }
+
+    return 'https://maps.googleapis.com/maps/api/place/photo?photoreference=$photoReference&maxwidth=400&key=${Env.googleMapsApiKey}';
+  }
+
+  String? get mapsUrl {
+    if (place_id == null || name == null) {
+      return null;
+    }
+
+    return 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(name!)}&query_place_id=$place_id';
+  }
 }
 
 @JsonSerializable()

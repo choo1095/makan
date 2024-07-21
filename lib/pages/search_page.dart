@@ -27,11 +27,11 @@ final FOOD_TYPES = [
   (id: 'bar', label: 'Bar'),
   (id: 'barbecue', label: 'Barbecue Restaurant'),
   (id: 'brazilian', label: 'Brazilian'),
-  (id: 'breakfast', label: 'Breakfast'),
-  (id: 'brunch', label: 'Brunch'),
+  (id: 'bubble tea', label: 'Bubble Tea'),
   (id: 'cafe', label: 'Cafe'),
   (id: 'chinese', label: 'Chinese'),
   (id: 'coffee', label: 'Coffee Shop'),
+  (id: 'desserts', label: 'Desserts'),
   (id: 'fast food', label: 'Fast Food'),
   (id: 'french', label: 'French'),
   (id: 'greek', label: 'Greek'),
@@ -48,7 +48,6 @@ final FOOD_TYPES = [
   (id: 'middle eastern', label: 'Middle Eastern'),
   (id: 'pizza', label: 'Pizza'),
   (id: 'ramen', label: 'Ramen'),
-  (id: 'restaurant', label: 'Restaurant'),
   (id: 'sandwich', label: 'Sandwich Shop'),
   (id: 'seafood', label: 'Seafood'),
   (id: 'spanish', label: 'Spanish'),
@@ -97,66 +96,70 @@ class _SearchPageState extends State<SearchPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Consumer(builder: (context, ref, _) {
-                  return ShadInputFormField(
-                    id: 'location',
-                    label: const Text('Location'),
-                    placeholder: const Text('e.g. Uptown, Petaling Jaya'),
-                    description: const Text(
-                      'Your current device location will be used if this is left blank.',
-                    ),
-                    onChanged: (v) =>
-                        ref.watch(searchFormProvider).locationSearchQuery = v,
-                  );
-                }),
+                Consumer(
+                  builder: (context, ref, _) {
+                    return ShadInputFormField(
+                      id: 'location',
+                      label: const Text('Location'),
+                      placeholder: const Text('e.g. Uptown, Petaling Jaya'),
+                      description: const Text(
+                        'Your current device location will be used if this is left blank.',
+                      ),
+                      onChanged: (v) =>
+                          ref.read(searchFormProvider).locationSearchQuery = v,
+                    );
+                  },
+                ),
                 const SizedBox(height: 32),
                 Row(
                   children: [
-                    ShadSelectFormField<String>(
-                      id: 'min_price',
-                      initialValue: '0',
-                      label: const Text('Min. Price Range'),
-                      options: PRICE_RANGE
-                          .map(
-                            (value) => ShadOption(
-                              value: value,
-                              child: Text(value),
-                            ),
-                          )
-                          .toList(),
-                      selectedOptionBuilder: (context, value) =>
-                          value == 'none' ? const Text('0') : Text(value),
-                      placeholder: const Text('0'),
-                    ),
-                    ShadSelectFormField<String>(
-                      id: 'max_price',
-                      initialValue: '4',
-                      label: const Text('Max. Price Range'),
-                      options: PRICE_RANGE
-                          .map(
-                            (value) => ShadOption(
-                              value: value,
-                              child: Text(value),
-                            ),
-                          )
-                          .toList(),
-                      selectedOptionBuilder: (context, value) =>
-                          value == 'none' ? const Text('4') : Text(value),
-                      placeholder: const Text('4'),
+                    Consumer(builder: (context, ref, _) {
+                      return ShadSelectFormField<String>(
+                        id: 'min_price',
+                        initialValue: '0',
+                        label: const Text('Min. Price Range'),
+                        options: PRICE_RANGE
+                            .map(
+                              (value) => ShadOption(
+                                value: value,
+                                child: Text(value),
+                              ),
+                            )
+                            .toList(),
+                        selectedOptionBuilder: (context, value) =>
+                            value == 'none' ? const Text('0') : Text(value),
+                        placeholder: const Text('0'),
+                        onChanged: (v) => ref
+                            .read(searchFormProvider)
+                            .minPrice = int.parse(v!),
+                      );
+                    }),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        return ShadSelectFormField<String>(
+                          id: 'max_price',
+                          initialValue: '4',
+                          label: const Text('Max. Price Range'),
+                          options: PRICE_RANGE
+                              .map(
+                                (value) => ShadOption(
+                                  value: value,
+                                  child: Text(value),
+                                ),
+                              )
+                              .toList(),
+                          selectedOptionBuilder: (context, value) =>
+                              value == 'none' ? const Text('4') : Text(value),
+                          placeholder: const Text('4'),
+                          onChanged: (v) => ref
+                              .read(searchFormProvider)
+                              .maxPrice = int.parse(v!),
+                        );
+                      },
                     ),
                   ],
                 ),
                 const SizedBox(height: 32),
-                // ShadRadioGroupFormField<String>(
-                //   label: const Text('Location Type'),
-                //   initialValue: LOCATION_TYPES.first.id,
-                //   items: LOCATION_TYPES.map(
-                //     (e) => ShadRadio(
-                //       value: e.id,
-                //       label: Text(e.label),
-                //     ),
-                //   ),
-                // ),
                 Text(
                   'Filter by categories (select up to 5)',
                   style: ShadTextDefaultTheme.small(family: kDefaultFontFamily)

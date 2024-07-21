@@ -27,8 +27,8 @@ abstract class RestClient {
     @Query('radius') required int radius,
     @Query('region') String? region = 'my',
     @Query('keyword') String? keyword,
-    @Query('minPrice') int? minPrice = 0,
-    @Query('maxPrice') int? maxPrice = 4,
+    @Query('minprice') int? minprice = 0,
+    @Query('maxprice') int? maxprice = 4,
     @Query('type') String? type = 'restaurant',
     @Query('next_page_token') String? next_page_token,
   });

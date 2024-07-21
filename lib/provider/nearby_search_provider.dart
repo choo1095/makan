@@ -9,7 +9,6 @@ import 'package:makan/provider/search_form_provider.dart';
 import 'package:makan/types/google_places.dart';
 import 'package:makan/types/nearby_places_params.dart';
 import 'package:makan/types/result.dart';
-import 'dart:developer';
 
 final nearbySearchProvider =
     ChangeNotifierProvider((ref) => NearbySearchProvider());
@@ -65,8 +64,8 @@ class NearbySearchProvider extends ChangeNotifier {
         radius:
             _nearbySearchParams!.radius == SearchRadius.focused ? 1500 : 20000,
         keyword: keyword,
-        minPrice: _nearbySearchParams!.minPrice,
-        maxPrice: _nearbySearchParams!.maxPrice,
+        minprice: _nearbySearchParams!.minPrice,
+        maxprice: _nearbySearchParams!.maxPrice,
         type: 'restaurant',
         next_page_token: nextPageToken,
       );
@@ -148,13 +147,5 @@ class NearbySearchProvider extends ChangeNotifier {
           .nextInt(_nearbySearchResults[randomCategoryIndex].length);
       return _nearbySearchResults[randomCategoryIndex][randomItemIndex];
     }
-  }
-
-  String? getPlaceImage(String? photoReference) {
-    if (photoReference == null) {
-      return '';
-    }
-
-    return 'https://maps.googleapis.com/maps/api/place/photo?photoreference=${photoReference}&maxwidth=400&key=${Env.googleMapsApiKey}';
   }
 }
