@@ -5,13 +5,13 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 class PlaceTile extends StatelessWidget {
   final GooglePlaces place;
   final bool showOpeningHours;
-  final double horizontalPadding;
+  final EdgeInsets padding;
   final Function()? onTap;
 
   const PlaceTile({
     required this.place,
     required this.showOpeningHours,
-    this.horizontalPadding = 0,
+    this.padding = EdgeInsets.zero,
     this.onTap,
     super.key,
   });
@@ -20,10 +20,7 @@ class PlaceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      contentPadding: EdgeInsets.symmetric(
-        vertical: 2,
-        horizontal: horizontalPadding,
-      ),
+      contentPadding: padding,
       title: Text(
         place.name ?? '',
         style: ShadTheme.of(context)

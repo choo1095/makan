@@ -52,16 +52,34 @@ class PlaceDialog extends StatelessWidget {
             image,
             width: double.infinity,
           ),
-          place != null
-              ? Material(
+          if (place != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Material(
                   child: PlaceTile(
-                  place: place!,
-                  showOpeningHours: true,
-                ))
-              : Text(
-                  '...Nothing! Please try again!',
-                  style: ShadTheme.of(context).textTheme.muted,
+                    place: place!,
+                    showOpeningHours: true,
+                  ),
                 ),
+                if (mapsUrl != null) ...[
+                  ShadButton.secondary(
+                    text: const Text('Open in Google Maps'),
+                    onPressed: () async {
+                      await launchUrl(
+                        Uri.parse(mapsUrl!),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  )
+                ],
+              ],
+            )
+          else
+            Text(
+              '...Nothing! Please try again!',
+              style: ShadTheme.of(context).textTheme.muted,
+            ),
         ],
       ),
       actions: [
@@ -69,26 +87,15 @@ class PlaceDialog extends StatelessWidget {
           text: Text(place != null ? 'Close' : 'Ok...'),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        if (mapsUrl != null) ...[
-          ShadButton.outline(
-            text: const Text('Open in Google Maps'),
-            onPressed: () async {
-              await launchUrl(
-                Uri.parse(mapsUrl!),
-                mode: LaunchMode.externalApplication,
-              );
-            },
-          )
-        ],
         if (onReroll != null)
-          ShadButton.secondary(
-            text: const Text('Roll again'),
+          ShadButton.outline(
+            text: const Text('Pick another one!'),
             onPressed: () async {
               Navigator.of(context).pop();
 
               onReroll?.call();
             },
-          )
+          ),
       ],
     );
   }

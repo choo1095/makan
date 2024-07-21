@@ -66,12 +66,15 @@ class NearbySearchProvider extends ChangeNotifier {
         keyword: keyword,
         minprice: _nearbySearchParams!.minPrice,
         maxprice: _nearbySearchParams!.maxPrice,
-        type: 'restaurant',
         next_page_token: nextPageToken,
       );
 
       if (res.status == STATUS_OK) {
         return Success(res.results ?? []);
+      }
+
+      if (res.status == STATUS_ZERO_RESULTS) {
+        return Failure(error.toString());
       }
 
       return Failure(res.error_message ?? 'Something went wrong.');

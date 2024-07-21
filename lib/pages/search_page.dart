@@ -6,6 +6,8 @@ import 'package:makan/provider/location_provider.dart';
 import 'package:makan/provider/nearby_search_provider.dart';
 import 'package:makan/provider/search_form_provider.dart';
 import 'package:makan/types/nearby_places_params.dart';
+import 'package:makan/types/result.dart';
+import 'package:makan/widgets/common_dialog.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 // ignore: constant_identifier_names
@@ -22,42 +24,38 @@ final LOCATION_TYPES = [
 
 // ignore: non_constant_identifier_names
 final FOOD_TYPES = [
-  (id: 'american', label: 'American'),
+  (id: 'american food', label: 'American'),
   (id: 'bakery', label: 'Bakery'),
   (id: 'bar', label: 'Bar'),
-  (id: 'barbecue', label: 'Barbecue Restaurant'),
-  (id: 'brazilian', label: 'Brazilian'),
-  (id: 'bubble tea', label: 'Bubble Tea'),
+  (id: 'barbecue restaurant', label: 'Barbecue'),
+  (id: 'brazilian food', label: 'Brazilian'),
+  (id: 'bubble tea shop', label: 'Bubble Tea'),
   (id: 'cafe', label: 'Cafe'),
-  (id: 'chinese', label: 'Chinese'),
-  (id: 'coffee', label: 'Coffee Shop'),
+  (id: 'chinese food', label: 'Chinese'),
+  (id: 'coffee shop', label: 'Coffee Shop'),
   (id: 'desserts', label: 'Desserts'),
   (id: 'fast food', label: 'Fast Food'),
-  (id: 'french', label: 'French'),
-  (id: 'greek', label: 'Greek'),
+  (id: 'french food', label: 'French'),
+  (id: 'greek food', label: 'Greek'),
   (id: 'hamburger', label: 'Hamburger'),
   (id: 'ice cream', label: 'Ice Cream'),
-  (id: 'indian', label: 'Indian'),
-  (id: 'indonesian', label: 'Indonesian'),
-  (id: 'italian', label: 'Italian'),
-  (id: 'japanese', label: 'Japanese'),
-  (id: 'korean', label: 'Korean'),
-  (id: 'lebanese', label: 'Lebanese'),
-  (id: 'mediterranean', label: 'Mediterranean'),
-  (id: 'mexican', label: 'Mexican'),
-  (id: 'middle eastern', label: 'Middle Eastern'),
+  (id: 'indian food', label: 'Indian'),
+  (id: 'indonesian food', label: 'Indonesian'),
+  (id: 'italian food', label: 'Italian'),
+  (id: 'japanese food', label: 'Japanese'),
+  (id: 'korean food', label: 'Korean'),
+  (id: 'lebanese food', label: 'Lebanese'),
+  (id: 'mediterranean food', label: 'Mediterranean'),
+  (id: 'mexican food', label: 'Mexican'),
+  (id: 'middle eastern food', label: 'Middle Eastern'),
   (id: 'pizza', label: 'Pizza'),
-  (id: 'ramen', label: 'Ramen'),
-  (id: 'sandwich', label: 'Sandwich Shop'),
-  (id: 'seafood', label: 'Seafood'),
-  (id: 'spanish', label: 'Spanish'),
-  (id: 'steak', label: 'Steak House'),
-  (id: 'sushi', label: 'Sushi'),
-  (id: 'thai', label: 'Thai'),
-  (id: 'turkish', label: 'Turkish'),
-  (id: 'vegan', label: 'Vegan'),
+  (id: 'seafood restaurant', label: 'Seafood'),
+  (id: 'spanish food', label: 'Spanish'),
+  (id: 'steak', label: 'Steak'),
+  (id: 'thai food', label: 'Thai'),
+  (id: 'turkish food', label: 'Turkish'),
   (id: 'vegetarian', label: 'Vegetarian'),
-  (id: 'vietnamese', label: 'Vietnamese'),
+  (id: 'vietnamese food', label: 'Vietnamese'),
 ];
 
 class SearchPage extends StatefulWidget {
@@ -161,9 +159,8 @@ class _SearchPageState extends State<SearchPage> {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Filter by categories (select up to 5)',
-                  style: ShadTextDefaultTheme.small(family: kDefaultFontFamily)
-                      .copyWith(color: Colors.black),
+                  'Filter by categories (max. 5)',
+                  style: ShadTheme.of(context).textTheme.small,
                 ),
                 const SizedBox(height: 8),
                 Consumer(
@@ -249,7 +246,22 @@ class _SearchPageState extends State<SearchPage> {
 
     // get lat/lon
     if (searchForm.locationSearchQuery.trim().isNotEmpty) {
-      await searchForm.fetchLatLonFromGeocoder();
+      final res = await searchForm.fetchLatLonFromGeocoder();
+
+      switch (res) {
+        case Success(value: final latLon):
+          searchForm.location = (latLon.$1, latLon.$2);
+          break;
+        case Failure(errorMessage: final error):
+          if (mounted) {
+            CommonDialog.show(
+              context,
+              description: error,
+              type: DialogType.error,
+            );
+          }
+          break;
+      }
     } else {
       final deviceCoordinates = await location.getLocation();
       searchForm.setLatLonFromDevice(deviceCoordinates);

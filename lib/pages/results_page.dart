@@ -99,6 +99,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
                     child: Text(
                       item.toUpperCase().substring(0, 1) + item.substring(1),
                       style: ShadTheme.of(context).textTheme.small,
+                      textAlign: TextAlign.center,
                     ),
                     // text:
                   ),
@@ -140,7 +141,10 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
               final place = results[index];
               return PlaceTile(
                 place: place,
-                horizontalPadding: PAGE_HORIZONTAL,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: PAGE_HORIZONTAL,
+                  vertical: 2,
+                ),
                 showOpeningHours: false,
                 onTap: () => showPlaceDialog(
                   context,
@@ -203,6 +207,8 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     if (mounted) nearbySearch.isLoading = true;
 
     await nearbySearch.fetchAllNearbyLocations();
+
+    await Future.delayed(const Duration(milliseconds: 300));
 
     if (mounted) nearbySearch.isLoading = false;
   }

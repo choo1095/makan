@@ -29,7 +29,7 @@ abstract class RestClient {
     @Query('keyword') String? keyword,
     @Query('minprice') int? minprice = 0,
     @Query('maxprice') int? maxprice = 4,
-    @Query('type') String? type = 'restaurant',
+    // @Query('type') String? type = 'restaurant',
     @Query('next_page_token') String? next_page_token,
   });
 }

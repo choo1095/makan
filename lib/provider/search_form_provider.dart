@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:location/location.dart';
 import 'package:makan/api/rest_client.dart';
 import 'package:makan/constants/places.dart';
 import 'package:makan/env/env.dart';
-import 'package:makan/types/nearby_places_params.dart';
+import 'package:makan/types/result.dart';
 
 enum SearchRadius {
   focused,
@@ -83,16 +81,24 @@ class SearchFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchLatLonFromGeocoder() async {
-    final res = await client()
-        .getGeocode(key: Env.googleMapsApiKey, address: _locationSearchQuery);
+  Future<Result<(double lat, double lon), String>>
+      fetchLatLonFromGeocoder() async {
+    try {
+      final res = await client()
+          .getGeocode(key: Env.googleMapsApiKey, address: _locationSearchQuery);
 
-    if (res.status == STATUS_OK) {
-      final geometry = res.results?.firstOrNull?.geometry;
-      _location =
-          (geometry?.location?.lat ?? 0.0, geometry?.location?.lng ?? 0.0);
-    } else {
-      print('location not found');
+      if (res.status == STATUS_OK) {
+        final geometry = res.results?.firstOrNull?.geometry;
+        return Success(
+            (geometry?.location?.lat ?? 0.0, geometry?.location?.lng ?? 0.0));
+      } else if (res.status == STATUS_ZERO_RESULTS) {
+        return const Failure(
+            'Location not found. Please try again with a different location.');
+      } else {
+        return const Failure('Something went wrong.');
+      }
+    } catch (e) {
+      return Failure(e.toString());
     }
   }
 
