@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:makan/constants/spacing.dart';
 import 'package:makan/types/google_places.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class SearchResultTile extends StatelessWidget {
   final GooglePlaces place;
@@ -20,31 +21,40 @@ class SearchResultTile extends StatelessWidget {
       title: Text.rich(
         TextSpan(
           children: [
-            TextSpan(text: place.name ?? ''),
+            TextSpan(
+              text: place.name ?? '',
+              style: ShadTheme.of(context)
+                  .textTheme
+                  .p
+                  .copyWith(height: 1.3, fontWeight: FontWeight.w500),
+            ),
             WidgetSpan(
               child: Padding(
                 padding: const EdgeInsets.only(
-                  left: 6,
-                  bottom: 1,
+                  left: 4,
+                  bottom: 6,
                 ),
                 child: Text(
                   '\$' * (place.price_level ?? 0),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: (place.price_level ?? 0) <= 2
-                        ? Colors.green[600]
-                        : Colors.red[600],
-                  ),
+                  style: ShadTheme.of(context).textTheme.small.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                        color: (place.price_level ?? 0) <= 2
+                            ? Colors.green[600]
+                            : Colors.red[600],
+                      ),
                 ),
               ),
             ),
           ],
         ),
       ),
-      subtitle: Text(place.vicinity ?? ''),
+      subtitle: Text(
+        place.vicinity ?? '',
+        style: ShadTheme.of(context).textTheme.muted,
+      ),
       trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
@@ -53,34 +63,40 @@ class SearchResultTile extends StatelessWidget {
                 : place.opening_hours!.open_now!
                     ? 'OPEN'
                     : 'CLOSED',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: place.opening_hours?.open_now ?? false
-                  ? Colors.green[600]
-                  : Colors.red[600],
-            ),
+            style: ShadTheme.of(context).textTheme.small.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: place.opening_hours?.open_now ?? false
+                      ? Colors.green[600]
+                      : Colors.red[600],
+                ),
           ),
           const SizedBox(height: 2),
-          if ((place.user_ratings_total ?? 0) > 0)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star, size: 14),
-                const SizedBox(width: 2),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: place.rating.toString()),
-                      TextSpan(
-                          text: ' (${place.user_ratings_total.toString()})',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                          ))
-                    ],
-                  ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.star, size: 14),
+              const SizedBox(width: 2),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: (place.rating ?? 0).toString(),
+                      style: ShadTheme.of(context).textTheme.small.copyWith(
+                            fontSize: 12,
+                          ),
+                    ),
+                    TextSpan(
+                      text: ' (${place.user_ratings_total ?? 0.toString()})',
+                      style: ShadTheme.of(context).textTheme.muted.copyWith(
+                            fontSize: 12,
+                          ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ],
       ),
     );

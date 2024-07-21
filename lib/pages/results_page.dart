@@ -92,10 +92,14 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
       bottom: showTabBar
           ? TabBar(
               tabs: [
-                for (var item
+                for (String item
                     in nearbySearch.nearbySearchParams?.foodTypes ?? [])
                   Tab(
-                    text: item,
+                    child: Text(
+                      item.toUpperCase().substring(0, 1) + item.substring(1),
+                      style: ShadTheme.of(context).textTheme.small,
+                    ),
+                    // text:
                   ),
               ],
             )
