@@ -6,7 +6,6 @@ import 'package:makan/provider/location_provider.dart';
 import 'package:makan/provider/nearby_search_provider.dart';
 import 'package:makan/provider/search_form_provider.dart';
 import 'package:makan/types/nearby_places_params.dart';
-import 'package:makan/widgets/common_app_bar.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 // ignore: constant_identifier_names

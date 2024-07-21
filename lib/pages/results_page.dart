@@ -4,6 +4,7 @@ import 'package:makan/constants/spacing.dart';
 import 'package:makan/provider/nearby_search_provider.dart';
 import 'package:makan/types/google_places.dart';
 import 'package:makan/widgets/common_app_bar.dart';
+import 'package:makan/widgets/place_randomize_one_dialog.dart';
 import 'package:makan/widgets/search_result_tile.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -83,7 +84,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
           padding: const EdgeInsets.only(
             right: 8.0,
           ),
-          child: ShadButton.ghost(
+          child: ShadButton(
             text: const Text('Pick one!'),
             onPressed: () => showOneRandomPlaceDialog(context, nearbySearch),
           ),
@@ -155,20 +156,9 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
   ) {
     final randomizedPlace = nearbySearch.getOneRandomPlace();
 
-    showShadDialog(
-      context: context,
-      builder: (context) => ShadDialog(
-        title: const Text('Here is what you picked:'),
-        description: randomizedPlace != null
-            ? Material(child: SearchResultTile(place: randomizedPlace))
-            : const Text('You picked...nothing! Please try again!'),
-        actions: [
-          ShadButton(
-            text: const Text('Ok...'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
+    PlaceRandomizeOneDialog.show(
+      context,
+      place: randomizedPlace,
     );
   }
 
