@@ -1,5 +1,4 @@
-import 'dart:developer';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +9,7 @@ import 'package:makan/provider/search_form_provider.dart';
 import 'package:makan/types/google_places.dart';
 import 'package:makan/types/nearby_places_params.dart';
 import 'package:makan/types/result.dart';
+import 'dart:developer';
 
 final nearbySearchProvider =
     ChangeNotifierProvider((ref) => NearbySearchProvider());
@@ -132,20 +132,29 @@ class NearbySearchProvider extends ChangeNotifier {
         return null;
       }
 
-      final randomIndex = Random().nextInt(_nearbySearchResults[0].length);
+      final randomIndex = math.Random().nextInt(_nearbySearchResults[0].length);
       return _nearbySearchResults[0][randomIndex];
     }
 
     // if more than one category is displayed
     else {
-      final randomCategoryIndex = Random().nextInt(_nearbySearchResults.length);
+      final randomCategoryIndex =
+          math.Random().nextInt(_nearbySearchResults.length);
       if (_nearbySearchResults[randomCategoryIndex].isEmpty) {
         return null;
       }
 
-      final randomItemIndex =
-          Random().nextInt(_nearbySearchResults[randomCategoryIndex].length);
+      final randomItemIndex = math.Random()
+          .nextInt(_nearbySearchResults[randomCategoryIndex].length);
       return _nearbySearchResults[randomCategoryIndex][randomItemIndex];
     }
+  }
+
+  String? getPlaceImage(String? photoReference) {
+    if (photoReference == null) {
+      return '';
+    }
+
+    return 'https://maps.googleapis.com/maps/api/place/photo?photoreference=${photoReference}&maxwidth=400&key=${Env.googleMapsApiKey}';
   }
 }

@@ -220,11 +220,13 @@ class _SearchPageState extends State<SearchPage> {
       ),
       bottomNavigationBar: Consumer(
         builder: (context, ref, _) {
+          final isLoading = ref.watch(searchFormProvider).isLoading;
+
           return Container(
             padding: PAGE_PADDING,
             child: ShadButton(
-              text: const Text('Submit'),
-              enabled: !ref.watch(searchFormProvider).isLoading,
+              text: Text(!isLoading ? 'Submit' : 'Loading...'),
+              enabled: !isLoading,
               onPressed: () {
                 onSearchSubmit(ref);
               },

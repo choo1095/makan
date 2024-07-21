@@ -32,13 +32,6 @@ abstract class RestClient {
     @Query('type') String? type = 'restaurant',
     @Query('next_page_token') String? next_page_token,
   });
-
-  @GET('/place/photo')
-  Future<GoogleRes<List<GooglePlaces>>> placeImage({
-    @Query('key') required String key,
-    @Query('photoreference') required String photoreference,
-    @Query('maxwidth') int maxwidth = 400,
-  });
 }
 
 RestClient client() {

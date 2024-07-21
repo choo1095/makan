@@ -153,13 +153,18 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
   void showOneRandomPlaceDialog(
     BuildContext context,
     NearbySearchProvider nearbySearch,
-  ) {
+  ) async {
     final randomizedPlace = nearbySearch.getOneRandomPlace();
+    final image = nearbySearch
+        .getPlaceImage(randomizedPlace?.photos?.firstOrNull?.photo_reference);
 
-    PlaceRandomizeOneDialog.show(
-      context,
-      place: randomizedPlace,
-    );
+    if (context.mounted) {
+      PlaceRandomizeOneDialog.show(
+        context,
+        place: randomizedPlace,
+        image: image,
+      );
+    }
   }
 
   void fetchData() async {
