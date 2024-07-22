@@ -70,12 +70,8 @@ class NearbySearchProvider extends ChangeNotifier {
         next_page_token: nextPageToken,
       );
 
-      if (res.status == STATUS_OK) {
+      if (res.status == STATUS_OK || res.status == STATUS_ZERO_RESULTS) {
         return Success(res.results ?? []);
-      }
-
-      if (res.status == STATUS_ZERO_RESULTS) {
-        return Failure(error.toString());
       }
 
       return Failure(res.error_message ?? 'Something went wrong.');
@@ -129,27 +125,19 @@ class NearbySearchProvider extends ChangeNotifier {
       return null;
     }
 
-    // if only one category is displayed
-    if (_nearbySearchResults.length == 1) {
-      if (_nearbySearchResults[0].isEmpty) {
-        return null;
-      }
+    // flatten list
+    final flattenedSearchResults =
+        _nearbySearchResults.expand((category) => category).toList();
 
-      final randomIndex = math.Random().nextInt(_nearbySearchResults[0].length);
-      return _nearbySearchResults[0][randomIndex];
+    final randomIndex = math.Random().nextInt(flattenedSearchResults.length);
+    return flattenedSearchResults[randomIndex];
+  }
+
+  bool get canDrawRandom {
+    if (_nearbySearchResults.any((category) => category.isNotEmpty)) {
+      return true;
     }
 
-    // if more than one category is displayed
-    else {
-      final randomCategoryIndex =
-          math.Random().nextInt(_nearbySearchResults.length);
-      if (_nearbySearchResults[randomCategoryIndex].isEmpty) {
-        return null;
-      }
-
-      final randomItemIndex = math.Random()
-          .nextInt(_nearbySearchResults[randomCategoryIndex].length);
-      return _nearbySearchResults[randomCategoryIndex][randomItemIndex];
-    }
+    return false;
   }
 }

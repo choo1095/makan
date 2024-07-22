@@ -80,15 +80,16 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     return CommonAppBar(
       title: 'Search Results',
       actions: [
-        Padding(
-          padding: const EdgeInsets.only(
-            right: 8.0,
+        if (nearbySearch.canDrawRandom)
+          Padding(
+            padding: const EdgeInsets.only(
+              right: 8.0,
+            ),
+            child: ShadButton(
+              text: const Text('Pick one!'),
+              onPressed: () => showOneRandomPlaceDialog(context, nearbySearch),
+            ),
           ),
-          child: ShadButton(
-            text: const Text('Pick one!'),
-            onPressed: () => showOneRandomPlaceDialog(context, nearbySearch),
-          ),
-        ),
       ],
       bottom: showTabBar
           ? TabBar(
@@ -124,15 +125,15 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
 
   Widget resultsListView(
       NearbySearchProvider nearbySearch, List<GooglePlaces> results) {
-    if (nearbySearch.error != null) {
-      return Padding(
-        padding: PAGE_PADDING,
-        child: Text(
-          nearbySearch.error ?? 'Error!',
-          style: ShadTheme.of(context).textTheme.muted,
-        ),
-      );
-    }
+    // if (nearbySearch.error != null) {
+    //   return Padding(
+    //     padding: PAGE_PADDING,
+    //     child: Text(
+    //       nearbySearch.error ?? 'Error!',
+    //       style: ShadTheme.of(context).textTheme.muted,
+    //     ),
+    //   );
+    // }
 
     return results.isNotEmpty
         ? ListView.builder(
@@ -157,7 +158,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
         : Padding(
             padding: PAGE_PADDING,
             child: Text(
-              nearbySearch.error ?? 'Error!',
+              'No results found.',
               style: ShadTheme.of(context).textTheme.muted,
             ),
           );

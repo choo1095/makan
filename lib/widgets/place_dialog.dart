@@ -48,14 +48,14 @@ class PlaceDialog extends StatelessWidget {
       title: dialogTitle != null ? Text(dialogTitle!) : null,
       content: Column(
         children: [
-          CommonImage(
-            image,
-            width: double.infinity,
-          ),
           if (place != null)
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                CommonImage(
+                  image,
+                  width: double.infinity,
+                ),
                 Material(
                   child: PlaceTile(
                     place: place!,
