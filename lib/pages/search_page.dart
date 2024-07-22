@@ -244,7 +244,7 @@ class _SearchPageState extends State<SearchPage> {
 
     searchForm.isLoading = true;
 
-    // get lat/lon
+    // if location field is not empty, get lat/lon from google geocoder
     if (searchForm.locationSearchQuery.trim().isNotEmpty) {
       final res = await searchForm.fetchLatLonFromGeocoder();
 
@@ -262,9 +262,25 @@ class _SearchPageState extends State<SearchPage> {
           }
           break;
       }
-    } else {
-      final deviceCoordinates = await location.getLocation();
-      searchForm.setLatLonFromDevice(deviceCoordinates);
+    }
+    // else, get lat/lon from device
+    else {
+      final res = await location.getLocation();
+
+      switch (res) {
+        case Success(value: final latLon):
+          searchForm.setLatLonFromDevice(latLon);
+          break;
+        case Failure(errorMessage: final error):
+          if (mounted) {
+            CommonDialog.show(
+              context,
+              description: error,
+              type: DialogType.error,
+            );
+          }
+          break;
+      }
     }
 
     searchForm.isLoading = false;

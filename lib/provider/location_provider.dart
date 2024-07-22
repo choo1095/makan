@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:location/location.dart';
+import 'package:makan/types/result.dart';
 
 final locationProvider = ChangeNotifierProvider((ref) => LocationProvider());
 
@@ -20,8 +21,8 @@ class LocationProvider extends ChangeNotifier {
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
       if (!_serviceEnabled) {
-        log('location service not enabled');
-        return false;
+        throw Exception(
+            'Location service not enabled. Please enable location settings.');
       }
     }
 
@@ -29,22 +30,25 @@ class LocationProvider extends ChangeNotifier {
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await location.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
-        log('location permissions not granted');
-        return false;
+        throw Exception(
+            'Location permissions not granted. Please enable location settings in Settings > Apps > Makan > Location..');
       }
     }
 
     return true;
   }
 
-  Future<LocationData?> getLocation() async {
-    final hasPermissions = await getLocationPermissions();
+  Future<Result<LocationData, String>> getLocation() async {
+    try {
+      final hasPermissions = await getLocationPermissions();
 
-    if (hasPermissions) {
-      _locationData = await location.getLocation();
-      log(_locationData.toString());
+      if (hasPermissions) {
+        _locationData = await location.getLocation();
+      }
+
+      return Success(_locationData!);
+    } catch (error) {
+      return Failure(error.toString());
     }
-
-    return _locationData;
   }
 }
