@@ -66,6 +66,7 @@ class NearbySearchProvider extends ChangeNotifier {
         keyword: keyword,
         minprice: _nearbySearchParams!.minPrice,
         maxprice: _nearbySearchParams!.maxPrice,
+        type: keyword == null ? 'restaurant' : null,
         next_page_token: nextPageToken,
       );
 
